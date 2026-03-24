@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "outDir": "../out/server",
+    "rootDir": ".",
+    "composite": true,
+    "types": ["bun-types"]
+  },
+  "include": ["./**/*.ts"]
+}
