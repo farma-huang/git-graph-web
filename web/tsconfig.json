@@ -1,19 +1,18 @@
 {
-  "compilerOptions": {
-    "lib": [
-      "es6",
-      "dom"
-    ],
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "removeComments": true,
-    "strict": true,
-    "target": "es2017",
-    "composite": true
-  },
-  "include": ["./**/*.ts"]
+	"compilerOptions": {
+		"lib": [
+			"es6",
+			"dom"
+		],
+		"module": "none",
+		"moduleResolution": "node",
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitAny": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"outDir": "../media",
+		"removeComments": true,
+		"strict": true,
+		"target": "es5"
+	}
 }
