@@ -65,12 +65,23 @@ export class MessageRouter {
 						error: await this.dataSource.cleanUntrackedFiles(this.repoPath, msg.directories)
 					} as any);
 					break;
-				case 'commitDetails':
-					this.send(ws, msg, {
-						command: 'commitDetails',
-						...(await this.dataSource.getCommitDetails(this.repoPath, msg.commitHash, msg.hasParents))
-					} as any);
-					break;
+			case 'commitDetails': {
+				const details = await this.dataSource.getCommitDetails(this.repoPath, msg.commitHash, msg.hasParents);
+				const codeReviews = this.extensionState.getCodeReviews(this.repoPath);
+				const codeReview = codeReviews[msg.commitHash]
+					? { id: msg.commitHash, lastViewedFile: codeReviews[msg.commitHash].lastViewedFile, remainingFiles: codeReviews[msg.commitHash].remainingFiles }
+					: null;
+				this.send(ws, msg, {
+					command: 'commitDetails',
+					...details,
+					codeReview,
+					avatar: null,
+					refresh: msg.refresh
+				} as any);
+				break;
+			}
+
+
 				case 'compareCommits':
 					this.send(ws, msg, {
 						command: 'compareCommits',
@@ -142,11 +153,16 @@ export class MessageRouter {
 						error: await this.dataSource.fetchIntoLocalBranch(this.repoPath, msg.remote, msg.remoteBranch, msg.localBranch, msg.force)
 					} as any);
 					break;
-				case 'loadConfig':
+				case 'loadConfig': {
+					const configData = await this.dataSource.getConfig(this.repoPath, msg.remotes);
 					this.send(ws, msg, {
-						...msg 
+						command: 'loadConfig',
+						repo: this.repoPath,
+						config: configData.config,
+						error: configData.error
 					} as any);
 					break;
+				}
 				case 'loadCommits':
 					this.send(ws, msg, {
 						command: 'loadCommits',
@@ -155,7 +171,8 @@ export class MessageRouter {
 					break;
 				case 'loadRepoInfo':
 					const info = await this.dataSource.getRepoInfo(this.repoPath, msg.showRemoteBranches, msg.showStashes, msg.hideRemotes);
-					const isKnown = await this.repoManager.isKnownRepo(this.repoPath);
+					const isKnown = this.repoManager.isKnownRepo(this.repoPath);
+					console.log('[loadRepoInfo] repoPath:', this.repoPath, 'isKnown:', isKnown, 'branches:', (info as any).branches?.length);
 					this.send(ws, msg, {
 						command: 'loadRepoInfo',
 						...info,
@@ -238,7 +255,7 @@ export class MessageRouter {
 	}
 
 	private send(ws: ServerWebSocket<unknown>, req: RequestMessage, res: Partial<ResponseMessage> & { command: string }) {
-		const fullRes = { ...res, requestId: req.requestId } as ResponseMessage;
+		const fullRes = { ...res, requestId: req.requestId, refreshId: (req as any).refreshId } as ResponseMessage;
 		ws.send(JSON.stringify(fullRes));
 	}
 }

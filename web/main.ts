@@ -487,6 +487,7 @@ export class GitGraphView {
 	public processLoadRepoInfoResponse(msg: GG.ResponseLoadRepoInfo) {
 		if (msg.error === null) {
 			const refreshState = this.currentRepoRefreshState;
+			console.log('[loadRepoInfo] inProgress:', refreshState.inProgress, 'stateId:', refreshState.loadRepoInfoRefreshId, 'msgId:', msg.refreshId, 'isRepo:', msg.isRepo, 'branches:', msg.branches?.length);
 			if (refreshState.inProgress && refreshState.loadRepoInfoRefreshId === msg.refreshId) {
 				this.loadRepoInfo(msg.branches, msg.head, msg.remotes, msg.stashes, msg.isRepo);
 			}
@@ -3197,12 +3198,16 @@ export class GitGraphView {
 
 /* Main */
 
-export const contextMenu = new ContextMenu(), dialog = new Dialog(), eventOverlay = new EventOverlay();
+export let contextMenu: ContextMenu, dialog: Dialog, eventOverlay: EventOverlay;
 let loaded = false;
 
 window.addEventListener('load', () => {
 	if (loaded) return;
 	loaded = true;
+
+	contextMenu = new ContextMenu();
+	dialog = new Dialog();
+	eventOverlay = new EventOverlay();
 
 	TextFormatter.registerCustomEmojiMappings(initialState.config.customEmojiShortcodeMappings);
 
@@ -3213,8 +3218,10 @@ window.addEventListener('load', () => {
 	const imageResizer = new ImageResizer();
 
 	/* Command Processing */
+	console.log('[main] registering message listener');
 	window.addEventListener('message', event => {
 		const msg: GG.ResponseMessage = event.data;
+		console.log('[main] received message:', msg.command);
 		switch (msg.command) {
 			case 'addRemote':
 				refreshOrDisplayError(msg.error, 'Unable to Add Remote', true);

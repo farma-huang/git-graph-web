@@ -8,7 +8,8 @@ import { Logger } from './logger';
 import { findGit } from './utils';
 import { MessageRouter } from './routes';
 import { Event } from './utils/event';
-import { RequestMessage } from './types';
+import { RequestMessage, GitGraphViewInitialState } from './types';
+import { getConfig } from './config';
 import * as path from 'path';
 
 async function main() {
@@ -53,6 +54,47 @@ async function main() {
 
 	const distPath = path.join(__dirname, '..', 'web', 'dist');
 
+	function buildInitialState(): GitGraphViewInitialState {
+		const config = getConfig();
+		return {
+			config: {
+				commitDetailsView: config.commitDetailsView,
+				commitOrdering: config.commitOrder,
+				contextMenuActionsVisibility: config.contextMenuActionsVisibility,
+				customBranchGlobPatterns: config.customBranchGlobPatterns,
+				customEmojiShortcodeMappings: config.customEmojiShortcodeMappings,
+				customPullRequestProviders: config.customPullRequestProviders,
+				dateFormat: config.dateFormat,
+				defaultColumnVisibility: config.defaultColumnVisibility,
+				dialogDefaults: config.dialogDefaults,
+				enhancedAccessibility: config.enhancedAccessibility,
+				fetchAndPrune: config.fetchAndPrune,
+				fetchAndPruneTags: config.fetchAndPruneTags,
+				fetchAvatars: config.fetchAvatars,
+				graph: config.graph,
+				includeCommitsMentionedByReflogs: config.includeCommitsMentionedByReflogs,
+				initialLoadCommits: config.initialLoadCommits,
+				keybindings: config.keybindings,
+				loadMoreCommits: config.loadMoreCommits,
+				loadMoreCommitsAutomatically: config.loadMoreCommitsAutomatically,
+				markdown: config.markdown,
+				mute: config.muteCommits,
+				onlyFollowFirstParent: config.onlyFollowFirstParent,
+				onRepoLoad: config.onRepoLoad,
+				referenceLabels: config.referenceLabels,
+				repoDropdownOrder: config.repoDropdownOrder,
+				showRemoteBranches: config.showRemoteBranches,
+				showStashes: config.showStashes,
+				showTags: config.showTags
+			},
+			lastActiveRepo: repoPath,
+			loadViewTo: null,
+			repos: repoManager.getRepos(),
+			loadRepoInfoRefreshId: 0,
+			loadCommitsRefreshId: 0
+		};
+	}
+
 	serve({
 		port: process.env.PORT ? parseInt(process.env.PORT) : 3000,
 		async fetch(req, server) {
@@ -60,6 +102,13 @@ async function main() {
 
 			const url = new URL(req.url);
 			let pathname = url.pathname;
+
+			if (pathname === '/api/initial-state') {
+				return new Response(JSON.stringify(buildInitialState()), {
+					headers: { 'Content-Type': 'application/json' }
+				});
+			}
+
 			if (pathname === '/') pathname = '/index.html';
 
 			try {

@@ -1,18 +1,19 @@
 {
 	"compilerOptions": {
 		"lib": [
-			"es6",
+			"ESNext",
 			"dom"
 		],
-		"module": "none",
-		"moduleResolution": "node",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitAny": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		"outDir": "../media",
 		"removeComments": true,
 		"strict": true,
-		"target": "es5"
-	}
+		"target": "ESNext",
+		"types": []
+	},
+	"include": ["./**/*.ts"]
 }
