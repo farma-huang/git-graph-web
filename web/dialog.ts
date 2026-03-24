@@ -1,14 +1,18 @@
-const CLASS_DIALOG_ACTIVE = 'dialogActive';
-const CLASS_DIALOG_INPUT_INVALID = 'inputInvalid';
-const CLASS_DIALOG_NO_INPUT = 'noInput';
+import * as GG from '../server/types';
+import { closeDialogAndContextMenu, eventOverlay, findCommitElemWithId } from './main';
+import { CLASS_FOCUSSED, CLASS_SELECTED, REF_INVALID_REGEX, SVG_ICONS, addListenerToCollectionElems, alterClass, alterClassOfCollection, escapeHtml, formatCommaSeparatedList, getCommitElems, handledEvent } from './utils';
 
-const enum DialogType {
+export const CLASS_DIALOG_ACTIVE = 'dialogActive';
+export const CLASS_DIALOG_INPUT_INVALID = 'inputInvalid';
+export const CLASS_DIALOG_NO_INPUT = 'noInput';
+
+export const enum DialogType {
 	Form,
 	ActionRunning,
 	Message
 }
 
-const enum DialogInputType {
+export const enum DialogInputType {
 	Text,
 	TextRef,
 	Select,
@@ -16,7 +20,7 @@ const enum DialogInputType {
 	Checkbox
 }
 
-interface DialogTextInput {
+export interface DialogTextInput {
 	readonly type: DialogInputType.Text;
 	readonly name: string;
 	readonly default: string;
@@ -24,14 +28,14 @@ interface DialogTextInput {
 	readonly info?: string;
 }
 
-interface DialogTextRefInput {
+export interface DialogTextRefInput {
 	readonly type: DialogInputType.TextRef;
 	readonly name: string;
 	readonly default: string;
 	readonly info?: string;
 }
 
-type DialogSelectInput = {
+export type DialogSelectInput = {
 	readonly type: DialogInputType.Select;
 	readonly name: string;
 	readonly options: ReadonlyArray<DialogSelectInputOption>;
@@ -47,34 +51,34 @@ type DialogSelectInput = {
 	readonly info?: string;
 };
 
-interface DialogRadioInput {
+export interface DialogRadioInput {
 	readonly type: DialogInputType.Radio;
 	readonly name: string;
 	readonly options: ReadonlyArray<DialogRadioInputOption>;
 	readonly default: string;
 }
 
-interface DialogCheckboxInput {
+export interface DialogCheckboxInput {
 	readonly type: DialogInputType.Checkbox;
 	readonly name: string;
 	readonly value: boolean;
 	readonly info?: string;
 }
 
-interface DialogSelectInputOption {
+export interface DialogSelectInputOption {
 	readonly name: string;
 	readonly value: string;
 }
 
-interface DialogRadioInputOption {
+export interface DialogRadioInputOption {
 	readonly name: string;
 	readonly value: string;
 }
 
-type DialogInput = DialogTextInput | DialogTextRefInput | DialogSelectInput | DialogRadioInput | DialogCheckboxInput;
-type DialogInputValue = string | string[] | boolean;
+export type DialogInput = DialogTextInput | DialogTextRefInput | DialogSelectInput | DialogRadioInput | DialogCheckboxInput;
+export type DialogInputValue = string | string[] | boolean;
 
-type DialogTarget = {
+export type DialogTarget = {
 	type: TargetType.Commit | TargetType.Ref | TargetType.CommitDetailsView;
 	elem: HTMLElement;
 	hash: string;
@@ -84,7 +88,7 @@ type DialogTarget = {
 /**
  * Implements the Git Graph View's dialogs.
  */
-class Dialog {
+export class Dialog {
 	private elem: HTMLElement | null = null;
 	private target: DialogTarget | null = null;
 	private actioned: (() => void) | null = null;
@@ -463,7 +467,7 @@ class Dialog {
 /**
  * Implements the Custom Select inputs used in dialogs.
  */
-class CustomSelect {
+export class CustomSelect {
 	private readonly data: DialogSelectInput;
 	private readonly selected: boolean[];
 	private lastSelected: number = -1;

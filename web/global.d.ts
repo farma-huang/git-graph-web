@@ -1,23 +1,21 @@
-import * as GG from '../out/types'; // Import types from back-end (requires `npm run compile-src`)
-
 declare global {
 
 	/* Visual Studio Code API Types */
 
 	function acquireVsCodeApi(): {
 		getState: () => WebViewState | null,
-		postMessage: (message: GG.RequestMessage) => void,
+		postMessage: (message: import('../server/types').RequestMessage) => void,
 		setState: (state: WebViewState) => void
 	};
 
 
 	/* State Types */
 
-	type Config = GG.GitGraphViewConfig;
+	type Config = import('../server/types').GitGraphViewConfig;
 
-	const initialState: GG.GitGraphViewInitialState;
-	const globalState: GG.DeepReadonly<GG.GitGraphViewGlobalState>;
-	const workspaceState: GG.DeepReadonly<GG.GitGraphViewWorkspaceState>;
+	const initialState: import('../server/types').GitGraphViewInitialState;
+	const globalState: import('../server/types').DeepReadonly<import('../server/types').GitGraphViewGlobalState>;
+	const workspaceState: import('../server/types').DeepReadonly<import('../server/types').GitGraphViewWorkspaceState>;
 
 	type AvatarImageCollection = { [email: string]: string };
 
@@ -27,11 +25,11 @@ declare global {
 		commitElem: HTMLElement | null;
 		compareWithHash: string | null;
 		compareWithElem: HTMLElement | null;
-		commitDetails: GG.GitCommitDetails | null;
-		fileChanges: ReadonlyArray<GG.GitFileChange> | null;
+		commitDetails: import('../server/types').GitCommitDetails | null;
+		fileChanges: ReadonlyArray<import('../server/types').GitFileChange> | null;
 		fileTree: FileTreeFolder | null;
 		avatar: string | null;
-		codeReview: GG.CodeReview | null;
+		codeReview: import('../server/types').CodeReview | null;
 		lastViewedFile: string | null;
 		loading: boolean;
 		scrollTop: {
@@ -47,14 +45,14 @@ declare global {
 	interface WebViewState {
 		readonly currentRepo: string;
 		readonly currentRepoLoading: boolean;
-		readonly gitRepos: GG.GitRepoSet;
+		readonly gitRepos: import('../server/types').GitRepoSet;
 		readonly gitBranches: ReadonlyArray<string>;
 		readonly gitBranchHead: string | null;
-		readonly gitConfig: GG.GitRepoConfig | null;
+		readonly gitConfig: import('../server/types').GitRepoConfig | null;
 		readonly gitRemotes: ReadonlyArray<string>;
-		readonly gitStashes: ReadonlyArray<GG.GitStash>;
+		readonly gitStashes: ReadonlyArray<import('../server/types').GitStash>;
 		readonly gitTags: ReadonlyArray<string>;
-		readonly commits: GG.GitCommit[];
+		readonly commits: import('../server/types').GitCommit[];
 		readonly commitHead: string | null;
 		readonly avatars: AvatarImageCollection;
 		readonly currentBranches: string[] | null;
@@ -63,8 +61,8 @@ declare global {
 		readonly onlyFollowFirstParent: boolean;
 		readonly expandedCommit: ExpandedCommit | null;
 		readonly scrollTop: number;
-		readonly findWidget: FindWidgetState;
-		readonly settingsWidget: SettingsWidgetState;
+		readonly findWidget: import('./findWidget').FindWidgetState;
+		readonly settingsWidget: import('./settingsWidget').SettingsWidgetState;
 	}
 
 
@@ -124,5 +122,4 @@ declare global {
 	}
 }
 
-export as namespace GG;
-export = GG;
+export {};

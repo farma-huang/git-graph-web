@@ -1,41 +1,45 @@
-const CLASS_GRAPH_VERTEX_ACTIVE = 'graphVertexActive';
-const NULL_VERTEX_ID = -1;
+import * as GG from '../server/types';
+import { abbrevCommit, closeDialogAndContextMenu, findCommitElemWithId, getBranchLabels } from './main';
+import { ELLIPSIS, SVG_NAMESPACE, UNCOMMITTED, escapeHtml, getCommitElems } from './utils';
+
+export const CLASS_GRAPH_VERTEX_ACTIVE = 'graphVertexActive';
+export const NULL_VERTEX_ID = -1;
 
 
 /* Types */
 
-interface Point {
+export interface Point {
 	readonly x: number;
 	readonly y: number;
 }
-interface Line {
+export interface Line {
 	readonly p1: Point;
 	readonly p2: Point;
 	readonly lockedFirst: boolean; // TRUE => The line is locked to p1, FALSE => The line is locked to p2
 }
 
-interface Pixel {
+export interface Pixel {
 	x: number;
 	y: number;
 }
-interface PlacedLine {
+export interface PlacedLine {
 	readonly p1: Pixel;
 	readonly p2: Pixel;
 	readonly isCommitted: boolean;
 	readonly lockedFirst: boolean; // TRUE => The line is locked to p1, FALSE => The line is locked to p2
 }
 
-interface UnavailablePoint {
+export interface UnavailablePoint {
 	readonly connectsTo: VertexOrNull;
 	readonly onBranch: Branch;
 }
 
-type VertexOrNull = Vertex | null;
+export type VertexOrNull = Vertex | null;
 
 
 /* Branch Class */
 
-class Branch {
+export class Branch {
 	private readonly colour: number;
 	private end: number = 0;
 	private lines: Line[] = [];
@@ -162,7 +166,7 @@ class Branch {
 
 /* Vertex Class */
 
-class Vertex {
+export class Vertex {
 	public readonly id: number;
 	public readonly isStash: boolean;
 
@@ -334,7 +338,7 @@ class Vertex {
 
 /* Graph Class */
 
-class Graph {
+export class Graph {
 	private readonly config: GG.GraphConfig;
 	private readonly muteConfig: GG.MuteCommitsConfig;
 	private vertices: Vertex[] = [];
@@ -358,7 +362,7 @@ class Graph {
 
 	private tooltipId: number = -1;
 	private tooltipElem: HTMLElement | null = null;
-	private tooltipTimeout: NodeJS.Timer | null = null;
+	private tooltipTimeout: number | null = null;
 	private tooltipVertex: HTMLElement | null = null;
 
 	constructor(id: string, viewElem: HTMLElement, config: GG.GraphConfig, muteConfig: GG.MuteCommitsConfig) {
