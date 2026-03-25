@@ -1,7 +1,7 @@
 import * as GG from '../server/types';
 import { GitGraphView, dialog, runAction, getShowStashes, getShowTags, getIncludeCommitsMentionedByReflogs, getOnlyFollowFirstParent, getOnRepoLoadShowCheckedOutBranch, getOnRepoLoadShowSpecificBranches } from './main';
 import { DialogInputType, DialogInput, DialogInputValue } from './dialog';
-import { SVG_ICONS, ELLIPSIS, CLASS_ACTIVE, CLASS_LOADING, CLASS_TRANSITION, observeElemScroll, alterClass, addListenerToClass, escapeHtml, formatCommaSeparatedList, getRepoName, arraysStrictlyEqualIgnoringOrder, updateGlobalViewState, sendMessage } from './utils';
+import { SVG_ICONS, ELLIPSIS, CLASS_ACTIVE, CLASS_LOADING, CLASS_TRANSITION, observeElemScroll, alterClass, addListenerToClass, escapeHtml, formatCommaSeparatedList, getRepoName, arraysStrictlyEqualIgnoringOrder, updateGlobalViewState } from './utils';
 
 export interface SettingsWidgetState {
 	readonly currentRepo: string | null;
@@ -244,10 +244,7 @@ export class SettingsWidget {
 				html += '</div>';
 			}
 
-			html += '<div class="settingsSection"><h3>Git Graph Configuration</h3><div class="settingsSectionButtons">' +
-				'<div id="openExtensionSettings">' + SVG_ICONS.gear + 'Open Git Graph Extension Settings</div><br/>' +
-				'<div id="exportRepositoryConfig">' + SVG_ICONS.package + 'Export Repository Configuration</div>' +
-				'</div></div>';
+			// Removed Git Graph extension configuration buttons
 
 			this.contentsElem.innerHTML = html;
 
@@ -523,16 +520,7 @@ export class SettingsWidget {
 				}
 			}
 
-			document.getElementById('openExtensionSettings')!.addEventListener('click', () => {
-				sendMessage({ command: 'openExtensionSettings' });
-			});
-
-			document.getElementById('exportRepositoryConfig')!.addEventListener('click', () => {
-				dialog.showConfirmation('Exporting the Git Graph Repository Configuration will generate a file that can be committed in this repository. It allows others working in this repository to use the same configuration.', 'Yes, export', () => {
-					if (this.currentRepo === null) return;
-					runAction({ command: 'exportRepoConfig', repo: this.currentRepo }, 'Exporting Repository Configuration');
-				}, null);
-			});
+			// Removed extension settings event listeners
 		}
 
 		alterClass(this.widgetElem, CLASS_LOADING, this.loading);
