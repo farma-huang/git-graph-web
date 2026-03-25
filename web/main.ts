@@ -17,7 +17,7 @@ import {
 	CLASS_TAG_LABELS_RIGHT_ALIGNED, CSS_PROP_FONT_FAMILY,
 	CSS_PROP_EDITOR_FONT_FAMILY, CSS_PROP_FIND_MATCH_HIGHLIGHT_BACKGROUND, CSS_PROP_SELECTION_BACKGROUND,
 	CSS_PROP_LIMIT_GRAPH_WIDTH, arraysEqual, arraysStrictlyEqual,
-	modifyColourOpacity, getRepoName, getSortedRepositoryPaths, escapeHtml, unescapeHtml,
+	modifyColourOpacity, getSortedRepositoryPaths, escapeHtml, unescapeHtml,
 	formatCommaSeparatedList, formatShortDate, formatLongDate, addListenerToClass,
 	insertAfter, insertBeforeFirstChildWithClass, alterClass, getChildUl, observeElemScroll, getCommitElems, handledEvent, updateGlobalViewState,
 	sendMessage, showErrorMessage, getVSCodeStyle, ImageResizer, EventOverlay
@@ -172,7 +172,7 @@ export class GitGraphView {
 			this.requestLoadRepoInfoAndCommits(false, false);
 		}
 
-		const fetchBtn = document.getElementById('fetchBtn')!, findBtn = document.getElementById('findBtn')!, settingsBtn = document.getElementById('settingsBtn')!, terminalBtn = document.getElementById('terminalBtn')!;
+		const fetchBtn = document.getElementById('fetchBtn')!, findBtn = document.getElementById('findBtn')!, settingsBtn = document.getElementById('settingsBtn')!;
 		fetchBtn.title = 'Fetch' + (this.config.fetchAndPrune ? ' & Prune' : '') + ' from Remote(s)';
 		fetchBtn.innerHTML = SVG_ICONS.download;
 		fetchBtn.addEventListener('click', () => this.fetchFromRemotesAction());
@@ -180,14 +180,6 @@ export class GitGraphView {
 		findBtn.addEventListener('click', () => this.findWidget.show(true));
 		settingsBtn.innerHTML = SVG_ICONS.gear;
 		settingsBtn.addEventListener('click', () => this.settingsWidget.show(this.currentRepo));
-		terminalBtn.innerHTML = SVG_ICONS.terminal;
-		terminalBtn.addEventListener('click', () => {
-			runAction({
-				command: 'openTerminal',
-				repo: this.currentRepo,
-				name: this.gitRepos[this.currentRepo].name || getRepoName(this.currentRepo)
-			}, 'Opening Terminal');
-		});
 	}
 
 
