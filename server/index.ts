@@ -7,6 +7,7 @@ import { RepoFileWatcher } from './repoFileWatcher';
 import { Logger } from './logger';
 import { findGit } from './utils';
 import { MessageRouter } from './routes';
+import { checkDifftAvailable } from './loadFileDiff';
 import { Event } from './utils/event';
 import { RequestMessage, GitGraphViewInitialState } from './types';
 import { getConfig } from './config';
@@ -29,7 +30,10 @@ async function main() {
 	const repoManager = new RepoManager(dataSource, state, logger, repoPath);
 	const avatarManager = new AvatarManager(dataSource, state, logger);
 
-	const router = new MessageRouter(dataSource, state, repoManager, avatarManager, repoPath);
+	const difftAvailable = await checkDifftAvailable();
+	console.log(`[server] difft available: ${difftAvailable}`);
+
+	const router = new MessageRouter(dataSource, state, repoManager, avatarManager, repoPath, difftAvailable);
 
 	const connectedClients = new Set<any>();
 

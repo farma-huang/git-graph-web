@@ -4,6 +4,7 @@ import { ExtensionState } from './extensionState';
 import { RepoManager } from './repoManager';
 import { AvatarManager } from './avatarManager';
 import { RequestMessage, ResponseMessage } from './types';
+import { runLoadFileDiff } from './loadFileDiff';
 
 export class MessageRouter {
 	constructor(
@@ -11,7 +12,8 @@ export class MessageRouter {
 		private readonly extensionState: ExtensionState,
 		private readonly repoManager: RepoManager,
 		private readonly avatarManager: AvatarManager,
-		private readonly repoPath: string
+		private readonly repoPath: string,
+		private readonly difftAvailable: boolean
 	) {}
 
 	public async handleMessage(ws: ServerWebSocket<unknown>, msg: RequestMessage): Promise<void> {
@@ -169,6 +171,28 @@ export class MessageRouter {
 						...(await this.dataSource.getCommits(this.repoPath, msg.branches, msg.maxCommits, msg.showTags, msg.showRemoteBranches, msg.includeCommitsMentionedByReflogs, msg.onlyFollowFirstParent, msg.commitOrdering, msg.remotes, msg.hideRemotes, msg.stashes))
 					} as any);
 					break;
+				case 'loadFileDiff': {
+					const result = await runLoadFileDiff({
+						commitHash: (msg as any).commitHash,
+						filePath: (msg as any).filePath,
+						oldFilePath: (msg as any).oldFilePath,
+						hasParents: (msg as any).hasParents,
+						parentIndex: (msg as any).parentIndex,
+						isDeleted: (msg as any).isDeleted,
+						difftAvailable: this.difftAvailable,
+						repoPath: this.repoPath
+					});
+					this.send(ws, msg, {
+						command: 'loadFileDiff',
+						commitHash: (msg as any).commitHash,
+						filePath: (msg as any).filePath,
+						oldFilePath: (msg as any).oldFilePath,
+						diff: result.diff,
+						format: result.format,
+						error: result.error
+					} as any);
+					break;
+				}
 				case 'loadRepoInfo':
 					const info = await this.dataSource.getRepoInfo(this.repoPath, msg.showRemoteBranches, msg.showStashes, msg.hideRemotes);
 					const isKnown = this.repoManager.isKnownRepo(this.repoPath);

@@ -6,6 +6,7 @@ A standalone web application that brings the [Git Graph VSCode extension](https:
 
 - [Bun](https://bun.sh) >= 1.0
 - Git installed and available in `PATH`
+- (Optional) [difftastic](https://difftastic.wilsonl.in/) installed and available in `PATH` for syntax-aware inline subword diffs.
 
 ## Setup
 

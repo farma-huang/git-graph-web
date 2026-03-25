@@ -1248,6 +1248,25 @@ export interface ResponseViewScm extends ResponseWithErrorInfo {
 	readonly command: 'viewScm';
 }
 
+export interface RequestLoadFileDiff extends BaseMessage {
+	readonly command: 'loadFileDiff';
+	readonly commitHash: string;
+	readonly filePath: string;
+	readonly oldFilePath?: string;
+	readonly hasParents: boolean;
+	readonly parentIndex: number;
+	readonly isDeleted: boolean;
+}
+export interface ResponseLoadFileDiff extends BaseMessage {
+	readonly command: 'loadFileDiff';
+	readonly commitHash: string;
+	readonly filePath: string;
+	readonly oldFilePath?: string;
+	readonly diff: string | null;
+	readonly format: 'difftastic' | 'git';
+	readonly error: string | null;
+}
+
 export type RequestMessage =
 	RequestAddRemote
 	| RequestAddTag
@@ -1310,7 +1329,8 @@ export type RequestMessage =
 	| RequestViewDiff
 	| RequestViewDiffWithWorkingFile
 	| RequestViewFileAtRevision
-	| RequestViewScm;
+	| RequestViewScm
+	| RequestLoadFileDiff;
 
 export type ResponseMessage =
 	ResponseAddRemote
@@ -1371,7 +1391,8 @@ export type ResponseMessage =
 	| ResponseViewDiff
 	| ResponseViewDiffWithWorkingFile
 	| ResponseViewFileAtRevision
-	| ResponseViewScm;
+	| ResponseViewScm
+	| ResponseLoadFileDiff;
 
 
 /** Helper Types */
