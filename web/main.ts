@@ -5,9 +5,9 @@ import { Graph } from './graph';
 import { FindWidget } from './findWidget';
 import { SettingsWidget } from './settingsWidget';
 import { Dropdown, DropdownOption } from './dropdown';
-import { ContextMenu, CLASS_CONTEXT_MENU_ACTIVE, ContextMenuActions, ContextMenuTarget, ContextMenuAction } from './contextMenu';
+import { ContextMenu, CLASS_CONTEXT_MENU_ACTIVE, ContextMenuActions, ContextMenuTarget } from './contextMenu';
 import { Dialog, DialogTarget, DialogInputType, DialogInput, DialogSelectInputOption } from './dialog';
-import { TextFormatter, CLASS_EXTERNAL_URL, CLASS_INTERNAL_URL, IssueLinking, isUrlElem, isExternalUrlElem, isInternalUrlElem, parseIssueLinkingConfig, generateIssueLinkFromMatch } from './textFormatter';
+import { TextFormatter, CLASS_EXTERNAL_URL, CLASS_INTERNAL_URL, isUrlElem, isExternalUrlElem, isInternalUrlElem } from './textFormatter';
 import {
 	SVG_ICONS, GIT_FILE_CHANGE_TYPES, GIT_SIGNATURE_STATUS_DESCRIPTIONS,
 	ELLIPSIS, UNCOMMITTED, SHOW_ALL_BRANCHES, COLUMN_HIDDEN, COLUMN_AUTO, COLUMN_MIN_WIDTH, COLUMN_LEFT_RIGHT_PADDING,
@@ -1100,15 +1100,10 @@ export class GitGraphView {
 		const commit = this.commits[this.commitLookup[hash]];
 		return [[
 			{
-				title: 'Add Tag' + ELLIPSIS,
-				visible: visibility.addTag,
-				onClick: () => this.addTagAction(hash, '', this.config.dialogDefaults.addTag.type, '', null, target)
-			}, {
 				title: 'Create Branch' + ELLIPSIS,
 				visible: visibility.createBranch,
 				onClick: () => this.createBranchAction(hash, '', this.config.dialogDefaults.createBranch.checkout, target)
-			}
-		], [
+			},
 			{
 				title: 'Checkout' + (globalState.alwaysAcceptCheckoutCommit ? '' : ELLIPSIS),
 				visible: visibility.checkout,
@@ -1125,7 +1120,8 @@ export class GitGraphView {
 						}, target);
 					}
 				}
-			}, {
+			},
+			{
 				title: 'Cherry Pick' + ELLIPSIS,
 				visible: visibility.cherrypick,
 				onClick: () => {
@@ -1167,69 +1163,6 @@ export class GitGraphView {
 							noCommit: <boolean>values[1]
 						}, 'Cherry picking Commit');
 					}, target);
-				}
-			}, {
-				title: 'Revert' + ELLIPSIS,
-				visible: visibility.revert,
-				onClick: () => {
-					if (commit.parents.length > 1) {
-						let options = commit.parents.map((hash, index) => ({
-							name: abbrevCommit(hash) + (typeof this.commitLookup[hash] === 'number' ? ': ' + this.commits[this.commitLookup[hash]].message : ''),
-							value: (index + 1).toString()
-						}));
-						dialog.showSelect('Are you sure you want to revert merge commit <b><i>' + abbrevCommit(hash) + '</i></b>? Choose the parent hash on the main branch, to revert the commit relative to:', '1', options, 'Yes, revert', (parentIndex) => {
-							runAction({ command: 'revertCommit', repo: this.currentRepo, commitHash: hash, parentIndex: parseInt(parentIndex) }, 'Reverting Commit');
-						}, target);
-					} else {
-						dialog.showConfirmation('Are you sure you want to revert commit <b><i>' + abbrevCommit(hash) + '</i></b>?', 'Yes, revert', () => {
-							runAction({ command: 'revertCommit', repo: this.currentRepo, commitHash: hash, parentIndex: 0 }, 'Reverting Commit');
-						}, target);
-					}
-				}
-			}, {
-				title: 'Drop' + ELLIPSIS,
-				visible: visibility.drop && this.graph.dropCommitPossible(this.commitLookup[hash]),
-				onClick: () => {
-					dialog.showConfirmation('Are you sure you want to permanently drop commit <b><i>' + abbrevCommit(hash) + '</i></b>?' + (this.onlyFollowFirstParent ? '<br/><i>Note: By enabling "Only follow the first parent of commits", some commits may have been hidden from the Git Graph View that could affect the outcome of performing this action.</i>' : ''), 'Yes, drop', () => {
-						runAction({ command: 'dropCommit', repo: this.currentRepo, commitHash: hash }, 'Dropping Commit');
-					}, target);
-				}
-			}
-		], [
-			{
-				title: 'Merge into current branch' + ELLIPSIS,
-				visible: visibility.merge,
-				onClick: () => this.mergeAction(hash, abbrevCommit(hash), GG.MergeActionOn.Commit, target)
-			}, {
-				title: 'Rebase current branch on this Commit' + ELLIPSIS,
-				visible: visibility.rebase,
-				onClick: () => this.rebaseAction(hash, abbrevCommit(hash), GG.RebaseActionOn.Commit, target)
-			}, {
-				title: 'Reset current branch to this Commit' + ELLIPSIS,
-				visible: visibility.reset,
-				onClick: () => {
-					dialog.showSelect('Are you sure you want to reset ' + (this.gitBranchHead !== null ? '<b><i>' + escapeHtml(this.gitBranchHead) + '</i></b> (the current branch)' : 'the current branch') + ' to commit <b><i>' + abbrevCommit(hash) + '</i></b>?', this.config.dialogDefaults.resetCommit.mode, [
-						{ name: 'Soft - Keep all changes, but reset head', value: GG.GitResetMode.Soft },
-						{ name: 'Mixed - Keep working tree, but reset index', value: GG.GitResetMode.Mixed },
-						{ name: 'Hard - Discard all changes', value: GG.GitResetMode.Hard }
-					], 'Yes, reset', (mode) => {
-						runAction({ command: 'resetToCommit', repo: this.currentRepo, commit: hash, resetMode: <GG.GitResetMode>mode }, 'Resetting to Commit');
-					}, target);
-				}
-			}
-		], [
-			{
-				title: 'Copy Commit Hash to Clipboard',
-				visible: visibility.copyHash,
-				onClick: () => {
-					sendMessage({ command: 'copyToClipboard', type: 'Commit Hash', data: hash });
-				}
-			},
-			{
-				title: 'Copy Commit Subject to Clipboard',
-				visible: visibility.copySubject,
-				onClick: () => {
-					sendMessage({ command: 'copyToClipboard', type: 'Commit Subject', data: commit.message });
 				}
 			}
 		]];
@@ -1590,15 +1523,7 @@ export class GitGraphView {
 		}, target);
 	}
 
-	private rebaseAction(obj: string, name: string, actionOn: GG.RebaseActionOn, target: DialogTarget & (CommitTarget | RefTarget)) {
-		dialog.showForm('Are you sure you want to rebase ' + (this.gitBranchHead !== null ? '<b><i>' + escapeHtml(this.gitBranchHead) + '</i></b> (the current branch)' : 'the current branch') + ' on ' + actionOn.toLowerCase() + ' <b><i>' + escapeHtml(name) + '</i></b>?', [
-			{ type: DialogInputType.Checkbox, name: 'Launch Interactive Rebase in new Terminal', value: this.config.dialogDefaults.rebase.interactive },
-			{ type: DialogInputType.Checkbox, name: 'Ignore Date', value: this.config.dialogDefaults.rebase.ignoreDate, info: 'Only applicable to a non-interactive rebase.' }
-		], 'Yes, rebase', (values) => {
-			let interactive = <boolean>values[0];
-			runAction({ command: 'rebase', repo: this.currentRepo, obj: obj, actionOn: actionOn, ignoreDate: <boolean>values[1], interactive: interactive }, interactive ? 'Launching Interactive Rebase' : 'Rebasing on ' + actionOn);
-		}, target);
-	}
+
 
 
 	/* Table Utils */
