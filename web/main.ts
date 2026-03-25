@@ -1238,8 +1238,6 @@ export class GitGraphView {
 	private getRemoteBranchContextMenuActions(remote: string, target: DialogTarget & RefTarget): ContextMenuActions {
 		const refName = target.ref, visibility = this.config.contextMenuActionsVisibility.remoteBranch;
 		const branchName = remote !== '' ? refName.substring(remote.length + 1) : '';
-		const prefixedRefName = 'remotes/' + refName;
-		const isSelectedInBranchesDropdown = this.branchDropdown.isSelected(prefixedRefName);
 		return [[
 			{
 				title: 'Checkout Branch' + ELLIPSIS,
@@ -1251,19 +1249,6 @@ export class GitGraphView {
 				onClick: () => {
 					dialog.showConfirmation('Are you sure you want to delete the remote branch <b><i>' + escapeHtml(refName) + '</i></b>?', 'Yes, delete', () => {
 						runAction({ command: 'deleteRemoteBranch', repo: this.currentRepo, branchName: branchName, remote: remote }, 'Deleting Remote Branch');
-					}, target);
-				}
-			}, {
-				title: 'Fetch into local branch' + ELLIPSIS,
-				visible: visibility.fetch && remote !== '' && this.gitBranches.includes(branchName) && this.gitBranchHead !== branchName,
-				onClick: () => {
-					dialog.showForm('Are you sure you want to fetch the remote branch <b><i>' + escapeHtml(refName) + '</i></b> into the local branch <b><i>' + escapeHtml(branchName) + '</i></b>?', [{
-						type: DialogInputType.Checkbox,
-						name: 'Force Fetch',
-						value: this.config.dialogDefaults.fetchIntoLocalBranch.forceFetch,
-						info: 'Force the local branch to be reset to this remote branch.'
-					}], 'Yes, fetch', (values) => {
-						runAction({ command: 'fetchIntoLocalBranch', repo: this.currentRepo, remote: remote, remoteBranch: branchName, localBranch: branchName, force: <boolean>values[0] }, 'Fetching Branch');
 					}, target);
 				}
 			}, {
@@ -1280,54 +1265,6 @@ export class GitGraphView {
 					], 'Yes, pull', (values) => {
 						runAction({ command: 'pullBranch', repo: this.currentRepo, branchName: branchName, remote: remote, createNewCommit: <boolean>values[0], squash: <boolean>values[1] }, 'Pulling Branch');
 					}, target);
-				}
-			}
-		], [
-			this.getViewIssueAction(refName, visibility.viewIssue, target),
-			{
-				title: 'Create Pull Request',
-				visible: visibility.createPullRequest && this.gitRepos[this.currentRepo].pullRequestConfig !== null && branchName !== 'HEAD' &&
-					(this.gitRepos[this.currentRepo].pullRequestConfig!.sourceRemote === remote || this.gitRepos[this.currentRepo].pullRequestConfig!.destRemote === remote),
-				onClick: () => {
-					const config = this.gitRepos[this.currentRepo].pullRequestConfig;
-					if (config === null) return;
-					const isDestRemote = config.destRemote === remote;
-					runAction({
-						command: 'createPullRequest',
-						repo: this.currentRepo,
-						config: config,
-						sourceRemote: isDestRemote ? config.destRemote! : config.sourceRemote,
-						sourceOwner: isDestRemote ? config.destOwner : config.sourceOwner,
-						sourceRepo: isDestRemote ? config.destRepo : config.sourceRepo,
-						sourceBranch: branchName,
-						push: false
-					}, 'Creating Pull Request');
-				}
-			}
-		], [
-			{
-				title: 'Create Archive',
-				visible: visibility.createArchive,
-				onClick: () => {
-					runAction({ command: 'createArchive', repo: this.currentRepo, ref: refName }, 'Creating Archive');
-				}
-			},
-			{
-				title: 'Select in Branches Dropdown',
-				visible: visibility.selectInBranchesDropdown && !isSelectedInBranchesDropdown,
-				onClick: () => this.branchDropdown.selectOption(prefixedRefName)
-			},
-			{
-				title: 'Unselect in Branches Dropdown',
-				visible: visibility.unselectInBranchesDropdown && isSelectedInBranchesDropdown,
-				onClick: () => this.branchDropdown.unselectOption(prefixedRefName)
-			}
-		], [
-			{
-				title: 'Copy Branch Name to Clipboard',
-				visible: visibility.copyName,
-				onClick: () => {
-					sendMessage({ command: 'copyToClipboard', type: 'Branch Name', data: refName });
 				}
 			}
 		]];
@@ -1518,37 +1455,6 @@ export class GitGraphView {
 			}
 		]];
 	}
-
-	private getViewIssueAction(refName: string, visible: boolean, target: DialogTarget & RefTarget): ContextMenuAction {
-		const issueLinks: { url: string, displayText: string }[] = [];
-
-		let issueLinking: IssueLinking | null, match: RegExpExecArray | null;
-		if (visible && (issueLinking = parseIssueLinkingConfig(this.gitRepos[this.currentRepo].issueLinkingConfig)) !== null) {
-			issueLinking.regexp.lastIndex = 0;
-			while (match = issueLinking.regexp.exec(refName)) {
-				if (match[0].length === 0) break;
-				issueLinks.push({
-					url: generateIssueLinkFromMatch(match, issueLinking),
-					displayText: match[0]
-				});
-			}
-		}
-
-		return {
-			title: 'View Issue' + (issueLinks.length > 1 ? ELLIPSIS : ''),
-			visible: issueLinks.length > 0,
-			onClick: () => {
-				if (issueLinks.length > 1) {
-					dialog.showSelect('Select which issue you want to view for this branch:', '0', issueLinks.map((issueLink, i) => ({ name: issueLink.displayText, value: i.toString() })), 'View Issue', (value) => {
-						sendMessage({ command: 'openExternalUrl', url: issueLinks[parseInt(value)].url });
-					}, target);
-				} else if (issueLinks.length === 1) {
-					sendMessage({ command: 'openExternalUrl', url: issueLinks[0].url });
-				}
-			}
-		};
-	}
-
 
 	/* Actions */
 
