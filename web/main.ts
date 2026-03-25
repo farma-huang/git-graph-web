@@ -1039,13 +1039,8 @@ export class GitGraphView {
 
 	private getBranchContextMenuActions(target: DialogTarget & RefTarget): ContextMenuActions {
 		const refName = target.ref, visibility = this.config.contextMenuActionsVisibility.branch;
-		const isSelectedInBranchesDropdown = this.branchDropdown.isSelected(refName);
 		return [[
 			{
-				title: 'Checkout Branch',
-				visible: visibility.checkout && this.gitBranchHead !== refName,
-				onClick: () => this.checkoutBranchAction(refName, null, null, target)
-			}, {
 				title: 'Rename Branch' + ELLIPSIS,
 				visible: visibility.rename,
 				onClick: () => {
@@ -1053,32 +1048,6 @@ export class GitGraphView {
 						runAction({ command: 'renameBranch', repo: this.currentRepo, oldName: refName, newName: newName }, 'Renaming Branch');
 					}, target);
 				}
-			}, {
-				title: 'Delete Branch' + ELLIPSIS,
-				visible: visibility.delete && this.gitBranchHead !== refName,
-				onClick: () => {
-					let remotesWithBranch = this.gitRemotes.filter(remote => this.gitBranches.includes('remotes/' + remote + '/' + refName));
-					let inputs: DialogInput[] = [{ type: DialogInputType.Checkbox, name: 'Force Delete', value: this.config.dialogDefaults.deleteBranch.forceDelete }];
-					if (remotesWithBranch.length > 0) {
-						inputs.push({
-							type: DialogInputType.Checkbox,
-							name: 'Delete this branch on the remote' + (this.gitRemotes.length > 1 ? 's' : ''),
-							value: false,
-							info: 'This branch is on the remote' + (remotesWithBranch.length > 1 ? 's: ' : ' ') + formatCommaSeparatedList(remotesWithBranch.map((remote) => '"' + remote + '"'))
-						});
-					}
-					dialog.showForm('Are you sure you want to delete the branch <b><i>' + escapeHtml(refName) + '</i></b>?', inputs, 'Yes, delete', (values) => {
-						runAction({ command: 'deleteBranch', repo: this.currentRepo, branchName: refName, forceDelete: <boolean>values[0], deleteOnRemotes: remotesWithBranch.length > 0 && <boolean>values[1] ? remotesWithBranch : [] }, 'Deleting Branch');
-					}, target);
-				}
-			}, {
-				title: 'Merge into current branch' + ELLIPSIS,
-				visible: visibility.merge && this.gitBranchHead !== refName,
-				onClick: () => this.mergeAction(refName, refName, GG.MergeActionOn.Branch, target)
-			}, {
-				title: 'Rebase current branch on Branch' + ELLIPSIS,
-				visible: visibility.rebase && this.gitBranchHead !== refName,
-				onClick: () => this.rebaseAction(refName, refName, GG.RebaseActionOn.Branch, target)
 			}, {
 				title: 'Push Branch' + ELLIPSIS,
 				visible: visibility.push && this.gitRemotes.length > 0,
@@ -1121,45 +1090,6 @@ export class GitGraphView {
 							willUpdateBranchConfig: setUpstream && remotes.length > 0 && (this.gitConfig === null || typeof this.gitConfig.branches[refName] === 'undefined' || this.gitConfig.branches[refName].remote !== remotes[remotes.length - 1])
 						}, 'Pushing Branch');
 					}, target);
-				}
-			}
-		], [
-			this.getViewIssueAction(refName, visibility.viewIssue, target),
-			{
-				title: 'Create Pull Request' + ELLIPSIS,
-				visible: visibility.createPullRequest && this.gitRepos[this.currentRepo].pullRequestConfig !== null,
-				onClick: () => {
-					const config = this.gitRepos[this.currentRepo].pullRequestConfig;
-					if (config === null) return;
-					dialog.showCheckbox('Are you sure you want to create a Pull Request for branch <b><i>' + escapeHtml(refName) + '</i></b>?', 'Push branch before creating the Pull Request', true, 'Yes, create Pull Request', (push) => {
-						runAction({ command: 'createPullRequest', repo: this.currentRepo, config: config, sourceRemote: config.sourceRemote, sourceOwner: config.sourceOwner, sourceRepo: config.sourceRepo, sourceBranch: refName, push: push }, 'Creating Pull Request');
-					}, target);
-				}
-			}
-		], [
-			{
-				title: 'Create Archive',
-				visible: visibility.createArchive,
-				onClick: () => {
-					runAction({ command: 'createArchive', repo: this.currentRepo, ref: refName }, 'Creating Archive');
-				}
-			},
-			{
-				title: 'Select in Branches Dropdown',
-				visible: visibility.selectInBranchesDropdown && !isSelectedInBranchesDropdown,
-				onClick: () => this.branchDropdown.selectOption(refName)
-			},
-			{
-				title: 'Unselect in Branches Dropdown',
-				visible: visibility.unselectInBranchesDropdown && isSelectedInBranchesDropdown,
-				onClick: () => this.branchDropdown.unselectOption(refName)
-			}
-		], [
-			{
-				title: 'Copy Branch Name to Clipboard',
-				visible: visibility.copyName,
-				onClick: () => {
-					sendMessage({ command: 'copyToClipboard', type: 'Branch Name', data: refName });
 				}
 			}
 		]];
