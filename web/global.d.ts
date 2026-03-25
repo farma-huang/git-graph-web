@@ -97,20 +97,15 @@ declare global {
 
 	/* Dialog & ContextMenu shared base Target interfaces */
 
-	const enum TargetType {
-		Commit = 'commit',
-		CommitDetailsView = 'cdv',
-		Ref = 'ref',
-		Repo = 'repo'
-	}
+	type TargetType = 'commit' | 'cdv' | 'ref' | 'repo';
 
 	interface CommitOrRefTarget {
-		type: TargetType.Commit | TargetType.Ref | TargetType.CommitDetailsView;
+		type: 'commit' | 'ref' | 'cdv';
 		elem: HTMLElement;
 	}
 
 	interface RepoTarget {
-		type: TargetType.Repo;
+		type: 'repo';
 	}
 
 	interface CommitTarget extends CommitOrRefTarget {

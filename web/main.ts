@@ -1971,7 +1971,7 @@ export class GitGraphView {
 				if (this.expandedCommit !== null && eventTarget.closest('#cdv') !== null) {
 					// URL is in the Commit Details View
 					target = {
-						type: TargetType.CommitDetailsView,
+						type: 'cdv',
 						hash: this.expandedCommit.commitHash,
 						index: this.commitLookup[this.expandedCommit.commitHash],
 						elem: <HTMLElement>eventTarget
@@ -1983,7 +1983,7 @@ export class GitGraphView {
 					const commit = this.getCommitOfElem(eventElem);
 					if (commit === null) return;
 					target = {
-						type: TargetType.Commit,
+						type: 'commit',
 						hash: commit.hash,
 						index: parseInt(eventElem.dataset.id!),
 						elem: <HTMLElement>eventTarget
@@ -1991,7 +1991,7 @@ export class GitGraphView {
 				} else {
 					// URL is in a dialog
 					target = {
-						type: TargetType.Repo
+						type: 'repo'
 					};
 					isInDialog = true;
 				}
@@ -2020,7 +2020,7 @@ export class GitGraphView {
 						}
 					]
 				], false, target, e, viewElem || document.body, () => {
-					if (target.type === TargetType.CommitDetailsView && this.expandedCommit !== null) {
+					if (target.type === 'cdv' && this.expandedCommit !== null) {
 						this.expandedCommit.contextMenuOpen.summary = false;
 					}
 				}, isInDialog ? 'dialogContextMenu' : null);
@@ -2092,7 +2092,7 @@ export class GitGraphView {
 					}
 
 					const target: ContextMenuTarget & DialogTarget & RefTarget = {
-						type: TargetType.Ref,
+						type: 'ref',
 						hash: commit.hash,
 						index: parseInt(commitElem.dataset.id!),
 						ref: refName,
@@ -2119,7 +2119,7 @@ export class GitGraphView {
 				if (commit === null) return;
 
 				const target: ContextMenuTarget & DialogTarget & RefTarget = {
-					type: TargetType.Ref,
+					type: 'ref',
 					hash: commit.hash,
 					index: parseInt(commitElem.dataset.id!),
 					ref: unescapeHtml(eventElem.dataset.name!),
@@ -2155,7 +2155,7 @@ export class GitGraphView {
 				if (commit === null) return;
 
 				const target: ContextMenuTarget & DialogTarget & CommitTarget = {
-					type: TargetType.Commit,
+					type: 'commit',
 					hash: commit.hash,
 					index: parseInt(eventElem.dataset.id!),
 					elem: eventElem
@@ -2792,7 +2792,7 @@ export class GitGraphView {
 			dialog.showConfirmation('Are you sure you want to reset <b><i>' + escapeHtml(file.newFilePath) + '</i></b> to it\'s state at commit <b><i>' + abbrevCommit(commitHash) + '</i></b>? Any uncommitted changes made to this file will be overwritten.', 'Yes, reset file', () => {
 				runAction({ command: 'resetFileToRevision', repo: this.currentRepo, commitHash: commitHash, filePath: file.newFilePath }, 'Resetting file');
 			}, {
-				type: TargetType.CommitDetailsView,
+				type: 'cdv',
 				hash: commitHash,
 				elem: fileElem
 			});
@@ -2890,7 +2890,7 @@ export class GitGraphView {
 			expandedCommit.contextMenuOpen.fileView = parseInt(fileElem.dataset.index!);
 
 			const target: ContextMenuTarget & CommitTarget = {
-				type: TargetType.CommitDetailsView,
+				type: 'cdv',
 				hash: expandedCommit.commitHash,
 				index: this.commitLookup[expandedCommit.commitHash],
 				elem: fileElem
@@ -3286,7 +3286,7 @@ window.addEventListener('load', () => {
 		if (msg.errors.length > 0 && msg.errors[0] !== null && msg.errors[0].includes('git branch -D')) {
 			dialog.showConfirmation('The branch <b><i>' + escapeHtml(msg.branchName) + '</i></b> is not fully merged. Would you like to force delete it?', 'Yes, force delete branch', () => {
 				runAction({ command: 'deleteBranch', repo: msg.repo, branchName: msg.branchName, forceDelete: true, deleteOnRemotes: msg.deleteOnRemotes }, 'Deleting Branch');
-			}, { type: TargetType.Repo });
+			}, { type: 'repo' });
 		} else {
 			refreshAndDisplayErrors(msg.errors, 'Unable to Delete Branch');
 		}
@@ -3313,7 +3313,7 @@ window.addEventListener('load', () => {
 				commitHash: commitHash,
 				skipRemoteCheck: true
 			}, 'Pushing Tag');
-		}, { type: TargetType.Repo }, 'Cancel', null, true);
+		}, { type: 'repo' }, 'Cancel', null, true);
 	}
 
 	function refreshOrDisplayError(error: GG.ErrorInfo, errorMessage: string, configChanges: boolean = false) {

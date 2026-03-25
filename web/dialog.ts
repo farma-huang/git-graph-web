@@ -79,7 +79,7 @@ export type DialogInput = DialogTextInput | DialogTextRefInput | DialogSelectInp
 export type DialogInputValue = string | string[] | boolean;
 
 export type DialogTarget = {
-	type: TargetType.Commit | TargetType.Ref | TargetType.CommitDetailsView;
+	type: 'commit' | 'ref' | 'cdv';
 	elem: HTMLElement;
 	hash: string;
 	ref?: string;
@@ -362,7 +362,7 @@ export class Dialog {
 		}
 		document.getElementById('dialogSecondaryAction')!.addEventListener('click', secondaryActioned !== null ? secondaryActioned : () => this.close());
 
-		if (this.target !== null && this.target.type !== TargetType.Repo) {
+		if (this.target !== null && this.target.type !== 'repo') {
 			alterClass(this.target.elem, CLASS_DIALOG_ACTIVE, true);
 		}
 	}
@@ -404,7 +404,7 @@ export class Dialog {
 	 * @param commits The new array of commits that is rendered in the Git Graph View.
 	 */
 	public refresh(commits: ReadonlyArray<GG.GitCommit>) {
-		if (!this.isOpen() || this.target === null || this.target.type === TargetType.Repo) {
+		if (!this.isOpen() || this.target === null || this.target.type === 'repo') {
 			// Don't need to refresh if: no dialog is open, it is not dynamic, or it is not reliant on commit changes
 			return;
 		}
@@ -417,7 +417,7 @@ export class Dialog {
 			if (commitElem !== null) {
 				if (typeof this.target.ref === 'undefined') {
 					// Dialog is only dependent on the commit itself
-					if (this.target.type !== TargetType.CommitDetailsView) {
+					if (this.target.type !== 'cdv') {
 						this.target.elem = commitElem;
 						alterClass(this.target.elem, CLASS_DIALOG_ACTIVE, true);
 					}
@@ -427,7 +427,7 @@ export class Dialog {
 					const elems = <NodeListOf<HTMLElement>>commitElem.querySelectorAll('[data-fullref]');
 					for (let i = 0; i < elems.length; i++) {
 						if (elems[i].dataset.fullref! === this.target.ref) {
-							this.target.elem = this.target.type === TargetType.Ref ? elems[i] : commitElem;
+							this.target.elem = this.target.type === 'ref' ? elems[i] : commitElem;
 							alterClass(this.target.elem, CLASS_DIALOG_ACTIVE, true);
 							return;
 						}

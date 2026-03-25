@@ -14,7 +14,7 @@ export interface ContextMenuAction {
 export type ContextMenuActions = ReadonlyArray<ReadonlyArray<ContextMenuAction>>;
 
 export type ContextMenuTarget = {
-	type: TargetType.Commit | TargetType.Ref | TargetType.CommitDetailsView;
+	type: 'commit' | 'ref' | 'cdv';
 	elem: HTMLElement;
 	hash: string;
 	index: number;
@@ -105,7 +105,7 @@ export class ContextMenu {
 		});
 
 		this.target = target;
-		if (this.target !== null && this.target.type !== TargetType.Repo) {
+		if (this.target !== null && this.target.type !== 'repo') {
 			alterClass(this.target.elem, CLASS_CONTEXT_MENU_ACTIVE, true);
 		}
 	}
@@ -132,7 +132,7 @@ export class ContextMenu {
 	 * @param commits The new array of commits that is rendered in the Git Graph View.
 	 */
 	public refresh(commits: ReadonlyArray<GG.GitCommit>) {
-		if (!this.isOpen() || this.target === null || this.target.type === TargetType.Repo) {
+		if (!this.isOpen() || this.target === null || this.target.type === 'repo') {
 			// Don't need to refresh if no context menu is open, or it is not dynamic
 			return;
 		}
@@ -144,7 +144,7 @@ export class ContextMenu {
 			if (commitElem !== null) {
 				if (typeof this.target.ref === 'undefined') {
 					// ContextMenu is only dependent on the commit itself
-					if (this.target.type !== TargetType.CommitDetailsView) {
+					if (this.target.type !== 'cdv') {
 						this.target.elem = commitElem;
 						alterClass(this.target.elem, CLASS_CONTEXT_MENU_ACTIVE, true);
 					}
@@ -154,7 +154,7 @@ export class ContextMenu {
 					const elems = <NodeListOf<HTMLElement>>commitElem.querySelectorAll('[data-fullref]');
 					for (let i = 0; i < elems.length; i++) {
 						if (elems[i].dataset.fullref! === this.target.ref) {
-							this.target.elem = this.target.type === TargetType.Ref ? elems[i] : commitElem;
+							this.target.elem = this.target.type === 'ref' ? elems[i] : commitElem;
 							alterClass(this.target.elem, CLASS_CONTEXT_MENU_ACTIVE, true);
 							return;
 						}

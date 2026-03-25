@@ -394,7 +394,7 @@ export class SettingsWidget {
 					], 'Add Remote', (values) => {
 						if (this.currentRepo === null) return;
 						runAction({ command: 'addRemote', repo: this.currentRepo, name: <string>values[0], url: <string>values[1], pushUrl: <string>values[2] !== '' ? <string>values[2] : null, fetch: <boolean>values[3] }, 'Adding Remote');
-					}, { type: TargetType.Repo });
+					}, { type: 'repo' });
 				});
 
 				addListenerToClass('editRemote', 'click', (e) => {
@@ -407,7 +407,7 @@ export class SettingsWidget {
 					], 'Save Changes', (values) => {
 						if (this.currentRepo === null) return;
 						runAction({ command: 'editRemote', repo: this.currentRepo, nameOld: remote.name, nameNew: <string>values[0], urlOld: remote.url, urlNew: <string>values[1] !== '' ? <string>values[1] : null, pushUrlOld: remote.pushUrl, pushUrlNew: <string>values[2] !== '' ? <string>values[2] : null }, 'Saving Changes to Remote');
-					}, { type: TargetType.Repo });
+					}, { type: 'repo' });
 				});
 
 				addListenerToClass('deleteRemote', 'click', (e) => {
@@ -416,7 +416,7 @@ export class SettingsWidget {
 					dialog.showConfirmation('Are you sure you want to delete the remote <b><i>' + escapeHtml(remote.name) + '</i></b>?', 'Yes, delete', () => {
 						if (this.currentRepo === null) return;
 						runAction({ command: 'deleteRemote', repo: this.currentRepo, name: remote.name }, 'Deleting Remote');
-					}, { type: TargetType.Repo });
+					}, { type: 'repo' });
 				});
 
 				addListenerToClass('fetchRemote', 'click', (e) => {
@@ -428,7 +428,7 @@ export class SettingsWidget {
 					], 'Yes, fetch', (values) => {
 						if (this.currentRepo === null) return;
 						runAction({ command: 'fetch', repo: this.currentRepo, name: remote.name, prune: <boolean>values[0], pruneTags: <boolean>values[1] }, 'Fetching from Remote');
-					}, { type: TargetType.Repo });
+					}, { type: 'repo' });
 				});
 
 				addListenerToClass('pruneRemote', 'click', (e) => {
@@ -437,7 +437,7 @@ export class SettingsWidget {
 					dialog.showConfirmation('Are you sure you want to prune remote-tracking references that no longer exist on the remote <b><i>' + escapeHtml(remote.name) + '</i></b>?', 'Yes, prune', () => {
 						if (this.currentRepo === null) return;
 						runAction({ command: 'pruneRemote', repo: this.currentRepo, name: remote.name }, 'Pruning Remote');
-					}, { type: TargetType.Repo });
+					}, { type: 'repo' });
 				});
 
 				addListenerToClass('hideRemoteBtn', 'click', (e) => {
@@ -744,7 +744,7 @@ export class SettingsWidget {
 			}
 
 			this.showCreatePullRequestIntegrationDialog2(config);
-		}, { type: TargetType.Repo });
+		}, { type: 'repo' });
 	}
 
 	/**
@@ -799,7 +799,7 @@ export class SettingsWidget {
 		dialog.showForm('Configure "Pull Request Creation" Integration (Step&nbsp;2/2)', inputs, 'Save Configuration', (values) => {
 			updateConfigWithFormValues(values);
 			this.setPullRequestConfig(config);
-		}, { type: TargetType.Repo }, 'Back', (values) => {
+		}, { type: 'repo' }, 'Back', (values) => {
 			updateConfigWithFormValues(values);
 			this.showCreatePullRequestIntegrationDialog1(config);
 		});
