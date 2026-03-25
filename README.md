@@ -69,3 +69,7 @@ PORT=8080 bun run start
 ```bash
 bun test
 ```
+
+## Acknowledgements
+
+This project was inspired by, and reuses significant portions of the frontend webview code and git core logic from the excellent [VSCode Git Graph](https://github.com/mhutchie/vscode-git-graph) extension created by Michael Hutchison. Thank you for building such an incredible open-source tool!

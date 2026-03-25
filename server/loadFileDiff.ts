@@ -65,29 +65,28 @@ export async function runLoadFileDiff(opts: RunLoadFileDiffOptions): Promise<Loa
 
 		try {
 			// Extract new file content
+			let newSideArg = '/dev/null';
 			if (!isDeleted) {
 				const newResult = await spawnAndRead(['git', 'show', `${toHash}:${newPath}`], repoPath);
-				if (newResult.exitCode !== 0) {
-					throw new Error(`git show new file failed (exit ${newResult.exitCode})`);
+				if (newResult.exitCode === 0) {
+					writeFileSync(newTmpFile, newResult.stdout);
+					newSideArg = newTmpFile;
 				}
-				writeFileSync(newTmpFile, newResult.stdout);
-			} else {
-				// deleted file, new file is /dev/null
 			}
 
 			if (oldRef !== null) {
 				oldTmpFile = join(tmpdir(), `gitgraphweb-${uuid}-old`);
 				const oldResult = await spawnAndRead(['git', 'show', `${oldRef}:${oldPath}`], repoPath);
-				if (oldResult.exitCode !== 0) {
-					throw new Error(`git show old file failed (exit ${oldResult.exitCode})`);
+				if (oldResult.exitCode === 0) {
+					writeFileSync(oldTmpFile, oldResult.stdout);
+					oldSideArg = oldTmpFile;
+				} else {
+					oldSideArg = '/dev/null';
 				}
-				writeFileSync(oldTmpFile, oldResult.stdout);
-				oldSideArg = oldTmpFile;
 			} else {
 				oldSideArg = '/dev/null';
 			}
 
-			const newSideArg = isDeleted ? '/dev/null' : newTmpFile;
 			const difftResult = await spawnAndRead(['difft', '--color', 'always', oldSideArg, newSideArg], repoPath);
 			return { diff: difftResult.stdout, format: 'difftastic', error: null };
 		} catch (e: any) {
@@ -103,12 +102,12 @@ export async function runLoadFileDiff(opts: RunLoadFileDiffOptions): Promise<Loa
 			if (oldRef === null) {
 				// New file / first commit: show the whole file as added
 				result = await spawnAndRead(['git', 'show', '--color=always', `${toHash}`, '--', newPath], repoPath);
-			} else if (isDeleted) {
-				// git diff on deletion
-				result = await spawnAndRead(['git', 'diff', '--color=always', `${oldRef}:${oldPath}`, '/dev/null'], repoPath);
 			} else {
-				// Diff two specific blobs: git diff <oldRef>:<oldPath> <commitHash>:<newPath>
-				result = await spawnAndRead(['git', 'diff', '--color=always', `${oldRef}:${oldPath}`, `${toHash}:${newPath}`], repoPath);
+				if (oldPath !== newPath) {
+					result = await spawnAndRead(['git', 'diff', '--color=always', `${oldRef}:${oldPath}`, `${toHash}:${newPath}`], repoPath);
+				} else {
+					result = await spawnAndRead(['git', 'diff', '--color=always', `${oldRef}`, `${toHash}`, '--', newPath], repoPath);
+				}
 			}
 			return { diff: result.stdout, format: 'git', error: null };
 		} catch (e: any) {
