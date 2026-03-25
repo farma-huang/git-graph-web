@@ -173,20 +173,21 @@ export class MessageRouter {
 					break;
 				case 'loadFileDiff': {
 					const result = await runLoadFileDiff({
-						commitHash: (msg as any).commitHash,
-						filePath: (msg as any).filePath,
+						fromHash: (msg as any).fromHash,
+						toHash: (msg as any).toHash,
 						oldFilePath: (msg as any).oldFilePath,
+						newFilePath: (msg as any).newFilePath,
 						hasParents: (msg as any).hasParents,
-						parentIndex: (msg as any).parentIndex,
 						isDeleted: (msg as any).isDeleted,
 						difftAvailable: this.difftAvailable,
 						repoPath: this.repoPath
 					});
 					this.send(ws, msg, {
 						command: 'loadFileDiff',
-						commitHash: (msg as any).commitHash,
-						filePath: (msg as any).filePath,
+						fromHash: (msg as any).fromHash,
+						toHash: (msg as any).toHash,
 						oldFilePath: (msg as any).oldFilePath,
+						newFilePath: (msg as any).newFilePath,
 						diff: result.diff,
 						format: result.format,
 						error: result.error

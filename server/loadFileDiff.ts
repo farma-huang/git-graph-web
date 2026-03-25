@@ -5,11 +5,11 @@ import { writeFileSync, unlinkSync, existsSync } from 'fs';
 export const UNCOMMITTED = '*';
 
 interface RunLoadFileDiffOptions {
-	commitHash: string;
-	filePath: string;
-	oldFilePath?: string;
+	fromHash: string;
+	toHash: string;
+	oldFilePath: string;
+	newFilePath: string;
 	hasParents: boolean;
-	parentIndex: number;
 	difftAvailable: boolean;
 	repoPath: string;
 	isDeleted?: boolean;
@@ -44,15 +44,18 @@ async function spawnAndRead(args: string[], cwd: string, timeoutMs = 30000): Pro
 }
 
 export async function runLoadFileDiff(opts: RunLoadFileDiffOptions): Promise<LoadFileDiffResult> {
-	const { commitHash, filePath, oldFilePath, hasParents, parentIndex, difftAvailable, repoPath, isDeleted } = opts;
+	const { fromHash, toHash, oldFilePath, newFilePath, hasParents, difftAvailable, repoPath, isDeleted } = opts;
 
-	if (commitHash === UNCOMMITTED) {
+	if (toHash === UNCOMMITTED) {
 		return { diff: null, format: 'git', error: 'Cannot diff uncommitted changes' };
 	}
 
-	const oldPath = oldFilePath ?? filePath;
-	const newPath = filePath;
-	const oldRef = hasParents ? `${commitHash}~${parentIndex}` : null;
+	const oldPath = oldFilePath;
+	const newPath = newFilePath;
+	let oldRef: string | null = fromHash;
+	if (fromHash === toHash) {
+		oldRef = hasParents ? `${toHash}^1` : null;
+	}
 
 	if (difftAvailable) {
 		const uuid = crypto.randomUUID();
@@ -63,7 +66,7 @@ export async function runLoadFileDiff(opts: RunLoadFileDiffOptions): Promise<Loa
 		try {
 			// Extract new file content
 			if (!isDeleted) {
-				const newResult = await spawnAndRead(['git', 'show', `${commitHash}:${newPath}`], repoPath);
+				const newResult = await spawnAndRead(['git', 'show', `${toHash}:${newPath}`], repoPath);
 				if (newResult.exitCode !== 0) {
 					throw new Error(`git show new file failed (exit ${newResult.exitCode})`);
 				}
@@ -99,13 +102,13 @@ export async function runLoadFileDiff(opts: RunLoadFileDiffOptions): Promise<Loa
 			let result: { stdout: string; exitCode: number };
 			if (oldRef === null) {
 				// New file / first commit: show the whole file as added
-				result = await spawnAndRead(['git', 'show', '--color=always', `${commitHash}`, '--', newPath], repoPath);
+				result = await spawnAndRead(['git', 'show', '--color=always', `${toHash}`, '--', newPath], repoPath);
 			} else if (isDeleted) {
 				// git diff on deletion
 				result = await spawnAndRead(['git', 'diff', '--color=always', `${oldRef}:${oldPath}`, '/dev/null'], repoPath);
 			} else {
 				// Diff two specific blobs: git diff <oldRef>:<oldPath> <commitHash>:<newPath>
-				result = await spawnAndRead(['git', 'diff', '--color=always', `${oldRef}:${oldPath}`, `${commitHash}:${newPath}`], repoPath);
+				result = await spawnAndRead(['git', 'diff', '--color=always', `${oldRef}:${oldPath}`, `${toHash}:${newPath}`], repoPath);
 			}
 			return { diff: result.stdout, format: 'git', error: null };
 		} catch (e: any) {

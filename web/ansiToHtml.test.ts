@@ -1,3 +1,4 @@
+// @ts-ignore
 import { describe, it, expect } from 'bun:test';
 import { ansiToHtml } from './ansiToHtml';
 

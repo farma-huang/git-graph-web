@@ -1250,18 +1250,19 @@ export interface ResponseViewScm extends ResponseWithErrorInfo {
 
 export interface RequestLoadFileDiff extends BaseMessage {
 	readonly command: 'loadFileDiff';
-	readonly commitHash: string;
-	readonly filePath: string;
-	readonly oldFilePath?: string;
+	readonly fromHash: string;
+	readonly toHash: string;
+	readonly oldFilePath: string;
+	readonly newFilePath: string;
 	readonly hasParents: boolean;
-	readonly parentIndex: number;
 	readonly isDeleted: boolean;
 }
 export interface ResponseLoadFileDiff extends BaseMessage {
 	readonly command: 'loadFileDiff';
-	readonly commitHash: string;
-	readonly filePath: string;
-	readonly oldFilePath?: string;
+	readonly fromHash: string;
+	readonly toHash: string;
+	readonly oldFilePath: string;
+	readonly newFilePath: string;
 	readonly diff: string | null;
 	readonly format: 'difftastic' | 'git';
 	readonly error: string | null;
