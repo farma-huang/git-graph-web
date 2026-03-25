@@ -812,7 +812,7 @@ body.tagLabelsRightAligned .gitRef.tag{
 	max-width:40vw;
 }
 
-#findBtn, #terminalBtn, #settingsBtn, #fetchBtn, #refreshBtn{
+#findBtn, #settingsBtn, #fetchBtn, #refreshBtn{
 	position:absolute;
 	top:50%;
 	width:20px;
@@ -823,9 +823,6 @@ body.tagLabelsRightAligned .gitRef.tag{
 	user-select:none;
 }
 #findBtn{
-	right:100px;
-}
-#terminalBtn{
 	right:70px;
 }
 #settingsBtn{
@@ -841,7 +838,7 @@ body.tagLabelsRightAligned .gitRef.tag{
 #refreshBtn.refreshing{
 	cursor:default;
 }
-#findBtn svg, #terminalBtn svg, #settingsBtn svg, #fetchBtn svg, #refreshBtn svg{
+#findBtn svg, #settingsBtn svg, #fetchBtn svg, #refreshBtn svg{
 	position:absolute;
 	fill:var(--vscode-editor-foreground);
 	opacity:0.8;
@@ -849,17 +846,17 @@ body.tagLabelsRightAligned .gitRef.tag{
 	stroke-opacity:0.5;
 	stroke-width:0;
 }
-#findBtn svg, #terminalBtn svg{
+#findBtn svg{
 	stroke-width:0.5px;
 }
-#findBtn:hover svg, #terminalBtn:hover svg, #settingsBtn:hover svg, #fetchBtn:hover svg, #refreshBtn:hover svg{
+#findBtn:hover svg, #settingsBtn:hover svg, #fetchBtn:hover svg, #refreshBtn:hover svg{
 	opacity:1;
 	stroke-width:0.5px;
 }
-#findBtn:hover svg, #terminalBtn:hover svg{
+#findBtn:hover svg{
 	stroke-width:1px;
 }
-#findBtn svg, #terminalBtn svg, #settingsBtn svg, #fetchBtn svg{
+#findBtn svg, #settingsBtn svg, #fetchBtn svg{
 	left:1px;
 	top:1px;
 	width:18px !important;
@@ -880,12 +877,9 @@ body.tagLabelsRightAligned .gitRef.tag{
 }
 
 #controls.fetchSupported{
-	padding-right:162px;
+	padding-right:132px;
 }
 #controls.fetchSupported #findBtn{
-	right:130px;
-}
-#controls.fetchSupported #terminalBtn{
 	right:100px;
 }
 #controls.fetchSupported #settingsBtn{
