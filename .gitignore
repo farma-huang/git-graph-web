@@ -5,3 +5,4 @@ out/
 .superpowers/
 web/bundle.js
 .test-data/
+.worktrees/
