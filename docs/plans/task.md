@@ -1,0 +1,4 @@
+- [x] Task 1: Restrict the Current Branch Context Menu
+- [x] Task 2: Restrict the Remote Branch Context Menu
+- [x] Task 3: Restrict the Commit Context Menu
+- [x] Task 4: Manual Testing
